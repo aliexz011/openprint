@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenPrint - Test Interface</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+            border-radius: 12px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #e94560;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
+
+        .status-dot.offline {
+            background: #ef4444;
+        }
+
+        .section {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #e94560;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .printer-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .printer-card {
+            background: #0f3460;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .printer-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .printer-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .printer-details {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .printer-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .printer-status.online {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+
+        .printer-status.offline {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .printer-status.error {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #e94560;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #d63d56;
+        }
+
+        .btn-secondary {
+            background: #0f3460;
+            color: #eee;
+            border: 1px solid #e94560;
+        }
+
+        .btn-secondary:hover {
+            background: #1a4a7a;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .no-printers {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            background: #4ade80;
+            color: #000;
+        }
+
+        .toast.error {
+            background: #ef4444;
+        }
+
+        .toast.info {
+            background: #3b82f6;
+        }
+
+        .refresh-btn {
+            background: none;
+            border: none;
+            color: #e94560;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 1rem;
+        }
+
+        .refresh-btn:hover {
+            opacity: 0.8;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e94560;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: #e94560;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>OpenPrint</h1>
+            <div class="status-bar">
+                <div class="status-item">
+                    <div class="status-dot" id="serverStatus"></div>
+                    <span id="serverStatusText">Connecting...</span>
+                </div>
+                <div class="status-item">
+                    <span id="printerCount">0 printers</span>
+                </div>
+                <div class="status-item">
+                    <span id="uptime">--</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="section">
+            <h2>
+                Printers
+                <button class="refresh-btn" onclick="refreshPrinters()" title="Refresh">&#8635;</button>
+            </h2>
+            <div id="printerList" class="printer-grid">
+                <div class="no-printers">Loading printers...</div>
+            </div>
+            <div class="actions">
+                <button class="btn btn-primary" onclick="printTestAll()" id="printAllBtn" disabled>
+                    Print Test on All
+                </button>
+                <button class="btn btn-secondary" onclick="refreshPrinters()">
+                    Refresh List
+                </button>
+            </div>
+        </div>
+
+        <footer>
+            OpenPrint v1.0.0 | Thermal Printer Proxy for POS Systems
+        </footer>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const API_BASE = '';
+        let printers = [];
+
+        async function fetchHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/api/health`);
+                const data = await response.json();
+
+                document.getElementById('serverStatus').classList.remove('offline');
+                document.getElementById('serverStatusText').textContent = 'Online';
+                document.getElementById('printerCount').textContent = `${data.printersAvailable} printer(s) online`;
+                document.getElementById('uptime').textContent = `Uptime: ${data.uptime}`;
+            } catch (error) {
+                document.getElementById('serverStatus').classList.add('offline');
+                document.getElementById('serverStatusText').textContent = 'Offline';
+            }
+        }
+
+        async function fetchPrinters() {
+            try {
+                const response = await fetch(`${API_BASE}/api/printers`);
+                const data = await response.json();
+                printers = data.printers || [];
+                renderPrinters();
+            } catch (error) {
+                console.error('Error fetching printers:', error);
+                showToast('Failed to fetch printers', 'error');
+            }
+        }
+
+        async function refreshPrinters() {
+            try {
+                showToast('Refreshing printers...', 'info');
+                const response = await fetch(`${API_BASE}/api/printers/refresh`, { method: 'POST' });
+                const data = await response.json();
+                printers = data.printers || [];
+                renderPrinters();
+                showToast('Printers refreshed', 'success');
+                fetchHealth();
+            } catch (error) {
+                console.error('Error refreshing printers:', error);
+                showToast('Failed to refresh printers', 'error');
+            }
+        }
+
+        function renderPrinters() {
+            const container = document.getElementById('printerList');
+            const printAllBtn = document.getElementById('printAllBtn');
+
+            if (printers.length === 0) {
+                container.innerHTML = '<div class="no-printers">No printers found. Check USB connections or network configuration.</div>';
+                printAllBtn.disabled = true;
+                return;
+            }
+
+            const onlinePrinters = printers.filter(p => p.status === 'online');
+            printAllBtn.disabled = onlinePrinters.length === 0;
+
+            container.innerHTML = printers.map(printer => `
+                <div class="printer-card">
+                    <div class="printer-info">
+                        <div class="printer-name">${escapeHtml(printer.name)}</div>
+                        <div class="printer-details">
+                            ${printer.connectionType === 'USB'
+                                ? `USB: ${escapeHtml(printer.devicePath || '')}`
+                                : `LAN: ${escapeHtml(printer.ipAddress || '')}:${printer.port || 9100}`}
+                            <br>
+                            ID: ${escapeHtml(printer.id)}
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <span class="printer-status ${printer.status}">
+                            <span class="status-dot ${printer.status === 'online' ? '' : 'offline'}"></span>
+                            ${printer.status}
+                        </span>
+                        <button class="btn btn-primary" onclick="printTest('${escapeHtml(printer.id)}')"
+                                ${printer.status !== 'online' ? 'disabled' : ''}>
+                            Test Print
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function printTest(printerId) {
+            try {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loading"></span>';
+
+                const response = await fetch(`${API_BASE}/api/printers/${encodeURIComponent(printerId)}/test`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(`Test print sent to ${data.printerUsed}`, 'success');
+                } else {
+                    showToast(data.message || 'Print failed', 'error');
+                }
+
+                btn.textContent = originalText;
+                btn.disabled = false;
+            } catch (error) {
+                console.error('Error printing test:', error);
+                showToast('Failed to send test print', 'error');
+                event.target.textContent = 'Test Print';
+                event.target.disabled = false;
+            }
+        }
+
+        async function printTestAll() {
+            const onlinePrinters = printers.filter(p => p.status === 'online');
+
+            if (onlinePrinters.length === 0) {
+                showToast('No online printers available', 'error');
+                return;
+            }
+
+            showToast(`Printing test on ${onlinePrinters.length} printer(s)...`, 'info');
+
+            let success = 0;
+            let failed = 0;
+
+            for (const printer of onlinePrinters) {
+                try {
+                    const response = await fetch(`${API_BASE}/api/printers/${encodeURIComponent(printer.id)}/test`, {
+                        method: 'POST'
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        success++;
+                    } else {
+                        failed++;
+                    }
+                } catch (error) {
+                    failed++;
+                }
+            }
+
+            if (failed === 0) {
+                showToast(`Test printed on ${success} printer(s)`, 'success');
+            } else {
+                showToast(`Success: ${success}, Failed: ${failed}`, failed > success ? 'error' : 'info');
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initial load
+        fetchHealth();
+        fetchPrinters();
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            fetchHealth();
+            fetchPrinters();
+        }, 30000);
+    </script>
+</body>
+</html>

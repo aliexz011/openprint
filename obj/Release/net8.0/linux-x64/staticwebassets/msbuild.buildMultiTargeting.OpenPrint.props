@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\OpenPrint.props" />
+</Project>
