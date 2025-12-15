@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using OpenPrint.Models;
 using OpenPrint.Services;
 
@@ -8,12 +9,26 @@ Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure as Windows Service if running as service
+builder.Host.UseWindowsService(options =>
+{
+    options.ServiceName = "OpenPrint";
+});
+
 // Configure settings
 builder.Services.Configure<OpenPrintSettings>(
     builder.Configuration.GetSection(OpenPrintSettings.SectionName));
 
-// Register services
-builder.Services.AddSingleton<IUsbPrinterDiscovery, UsbPrinterDiscovery>();
+// Register services - use Windows-specific discovery on Windows
+if (OperatingSystem.IsWindows())
+{
+    builder.Services.AddSingleton<IUsbPrinterDiscovery, WindowsUsbPrinterDiscovery>();
+}
+else
+{
+    builder.Services.AddSingleton<IUsbPrinterDiscovery, UsbPrinterDiscovery>();
+}
+
 builder.Services.AddSingleton<INetworkPrinterManager, NetworkPrinterManager>();
 builder.Services.AddSingleton<PrintQueue>();
 builder.Services.AddSingleton<IPrinterService, PrinterService>();
@@ -116,8 +131,19 @@ app.MapGet("/test", () => Results.Redirect("/"));
 // Startup logging
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("OpenPrint starting on http://{Host}:{Port}", settings.Host, settings.Port);
+logger.LogInformation("Platform: {Platform}", Environment.OSVersion.Platform);
 logger.LogInformation("Auto-discover USB: {AutoDiscoverUSB}", settings.AutoDiscoverUSB);
 logger.LogInformation("Configured network printers: {Count}", settings.NetworkPrinters.Count);
+
+if (OperatingSystem.IsWindows())
+{
+    logger.LogInformation("LibUSB (direct USB): {Enabled}", settings.UseLibUsb ? "enabled" : "disabled");
+    logger.LogInformation("Windows Spooler: {Enabled}", settings.UseWindowsSpooler ? "enabled" : "disabled");
+    logger.LogInformation("Configured LibUSB printers: {Count}", settings.LibUsbPrinters.Count);
+    logger.LogInformation("Configured Windows printers: {Count}", settings.WindowsPrinters.Count);
+    logger.LogInformation("Configured serial ports: {Count}", settings.SerialPorts.Count);
+}
+
 logger.LogInformation("Default encoding: {Encoding}", settings.PrintDefaults.Encoding);
 
 // Initialize printer discovery on startup

@@ -1,3 +1,0 @@
-D:\Openprint by AliexZ\OpenPrint\publish\linux\appsettings.json
-D:\Openprint by AliexZ\OpenPrint\publish\linux\OpenPrint.pdb
-D:\Openprint by AliexZ\OpenPrint\publish\linux\OpenPrint

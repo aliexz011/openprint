@@ -1,0 +1,24 @@
+# Build results
+bin/
+obj/
+publish/
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Archives
+*.zip
+*.tar.gz
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug
+*.pdb
